@@ -1,0 +1,33 @@
+name: Quality Checks
+
+on:
+  push:
+    branches:
+      - master
+
+  pull_request:
+    branches:
+      - master
+    
+jobs:
+  quality_checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    name: Quality Checks ${{ matrix.ruby }}
+    strategy:
+      matrix:
+        ruby:
+          - '3.4.9'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+      - name: Run RSpec
+        run: bundle exec rake
+#      - name: Add Linux platform
+#        run: bundle lock --add-platform x86_64-linux || true
+#      - name: Install dependencies
+#        run: bundle install

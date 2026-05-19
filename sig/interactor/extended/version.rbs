@@ -1,0 +1,10 @@
+module Interactor
+  module Extended
+    VERSION: String
+
+    class << self
+      def version -> String
+      def revision -> String | nil
+    end
+  end
+end

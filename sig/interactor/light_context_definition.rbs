@@ -1,0 +1,13 @@
+module Interactor
+  module LightContextDefinition
+    class << self
+      def included: (untyped base) -> void
+    end
+
+    module ClassMethods
+      def attribute: (*Symbol | String, ?array: bool, ?default: untyped, ?required: bool, ?direction: Symbol) -> void
+      def input: (*Symbol | String, ?array: bool, ?default: untyped, ?required: bool, ?writer: bool) -> void
+      def output: (*Symbol | String, ?array: bool, ?default: untyped, ?required: bool) -> void
+    end
+  end
+end

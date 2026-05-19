@@ -1,0 +1,9 @@
+module Interactor
+  module Duration
+    class ColorStringFormatter < StringFormatter
+      protected
+
+      def message: (Hash[Symbol, untyped] node, Integer max) -> String
+    end
+  end
+end

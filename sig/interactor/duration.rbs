@@ -1,0 +1,7 @@
+module Interactor
+  module Duration
+    class << self
+      def included: (untyped base) -> void
+    end
+  end
+end

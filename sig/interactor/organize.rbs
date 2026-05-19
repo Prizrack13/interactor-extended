@@ -1,0 +1,21 @@
+module Interactor
+  module Organize
+    class ThreadRunner < Proc
+    end
+
+    class << self
+      def included: (untyped base) -> void
+    end
+
+    module ClassMethods
+      def thread: (untyped klass) -> ThreadRunner
+    end
+
+    def call: () -> untyped
+
+    protected
+
+    def organize: (*untyped organized) -> Array[untyped]
+    def organized: () -> untyped
+  end
+end

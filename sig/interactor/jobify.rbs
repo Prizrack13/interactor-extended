@@ -1,0 +1,32 @@
+module Interactor
+  module Jobify
+    class << self
+      def included: (untyped base) -> void
+    end
+
+    module ClassMethods
+      attr_reader job_active: bool | nil
+      attr_reader job_class: Class | nil
+      attr_reader job_default: bool
+      attr_reader job_params: untyped
+
+      def jobify: (?klass: Class | nil, ?params: untyped, ?default: bool) { (untyped) -> untyped } -> void
+    end
+
+    def job_active: () -> bool | nil
+    def job_default: () -> bool
+    def run!: () -> untyped
+
+    protected
+
+    def jobify?: () -> bool
+    def job_class: () -> Class
+    def job_params: () -> untyped
+    def perform_in?: () -> bool
+    def perform_job: (?untyped params) -> void
+    def perform_later: (untyped args) -> void
+    def perform_in: (untyped wait, untyped args) -> void
+    def sidekiq?: () -> bool
+    def application_job?: () -> bool
+  end
+end

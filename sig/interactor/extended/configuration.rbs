@@ -1,0 +1,14 @@
+module Interactor
+  module Extended
+    class Configuration
+      attr_accessor logger: untyped
+      attr_accessor type: Symbol | Array[untyped]
+      attr_accessor duration_format: Symbol | String | nil
+      attr_accessor on_duration: ((String) -> void) | nil
+      attr_reader types: Hash[Symbol, Array[untyped]]
+
+      def initialize: () -> void
+      def add_type!: (Symbol type, ?Array[untyped] modules, ?Symbol | nil inherit) -> void
+    end
+  end
+end

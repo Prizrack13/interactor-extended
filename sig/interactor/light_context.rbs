@@ -1,0 +1,28 @@
+module Interactor
+  class LightContext < BasicObject
+    def success?: () -> bool
+    def failure?: () -> bool
+    def fail!: (?Hash[untyped, untyped] context) -> void
+    def called!: (untyped interactor) -> void
+    def rollback!: () -> bool
+    def _called: () -> Array[untyped]
+    def initialize: (?Hash[untyped, untyped] data) -> void
+    def to_h: () -> Hash[Symbol, untyped]
+    def inspect: () -> String
+    def to_s: () -> String
+    def key?: (untyped name) -> bool
+    def []: (untyped name) -> untyped
+    def []=: (untyped key, untyped value) -> untyped
+    def respond_to?: (untyped name, ?bool include_private) -> bool
+    def deconstruct_keys: (?Array[Symbol] | nil keys) -> Hash[Symbol, untyped]
+
+    private
+
+    def respond_to_missing?: (untyped name, ?bool _include_private) -> bool
+    def method_missing: (untyped name, *untyped args) -> untyped
+
+    class << self
+      def build: (?untyped context) -> LightContext
+    end
+  end
+end

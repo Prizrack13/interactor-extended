@@ -1,0 +1,8 @@
+module Interactor
+  module Operation
+    class << self
+      def included: (untyped base) -> void
+      def []: (Symbol type) -> Module
+    end
+  end
+end

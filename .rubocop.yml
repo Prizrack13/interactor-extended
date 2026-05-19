@@ -1,13 +1,28 @@
 AllCops:
-  TargetRubyVersion: 2.6
+  NewCops: enable
+  TargetRubyVersion: 3.2.2
+  SuggestExtensions: false
+  Exclude:
+    - 'vendor/**/*'
+    - 'zzz/**/*'
 
-Style/StringLiterals:
-  Enabled: true
-  EnforcedStyle: double_quotes
+Style/Documentation:
+  Description: 'Document classes and non-namespace modules.'
+  Enabled: false
+  VersionAdded: '0.9'
+  AllowedConstants: []
+  Exclude:
+    - 'spec/**/*'
+    - 'test/**/*'
 
-Style/StringLiteralsInInterpolation:
-  Enabled: true
-  EnforcedStyle: double_quotes
+Metrics/MethodLength:
+  Enabled: false
 
-Layout/LineLength:
-  Max: 120
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/BlockLength:
+  AllowedMethods: ['describe', 'context']
+  Exclude:
+    - 'spec/**/*'
+    - '*.gemspec'

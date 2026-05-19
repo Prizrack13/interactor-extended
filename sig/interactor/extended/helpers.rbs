@@ -1,0 +1,9 @@
+module Interactor
+  module Extended
+    module Helpers
+      def deep_dup: (untyped obj) -> untyped
+      def deep_transform_keys: (untyped object) { (untyped) -> untyped } -> untyped
+      def safe_constantize: (String camel_cased_word) -> untyped
+    end
+  end
+end

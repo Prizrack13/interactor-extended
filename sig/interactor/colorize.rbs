@@ -1,0 +1,9 @@
+module Interactor
+  module Colorize
+    class << self
+      def colorize: (String msg, ?Symbol | nil color_value, ?color: Symbol | nil, ?mode: Symbol | nil, ?bg: Symbol | nil) -> String
+    end
+
+    def colorize: (*untyped) -> String
+  end
+end

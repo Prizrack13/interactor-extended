@@ -1,0 +1,12 @@
+module Interactor
+  module Duration
+    class BaseFormatter
+      def initialize: (untyped duration, ?Hash[untyped, untyped] options) -> void
+      def value: () -> untyped
+
+      class << self
+        def value: (untyped data) -> untyped
+      end
+    end
+  end
+end

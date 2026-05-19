@@ -1,0 +1,20 @@
+module Interactor
+  module ContextDefinition
+    class << self
+      def included: (untyped base) -> void
+    end
+
+    module ClassMethods
+      attr_accessor attributes: Hash[Symbol, Hash[Symbol, untyped]] | nil
+
+      def attribute: (*Symbol | String, ?array: bool, ?default: untyped, ?required: bool, ?direction: Symbol) -> void
+      def input: (*Symbol | String, ?array: bool, ?default: untyped, ?required: bool, ?writer: bool) -> void
+      def output: (*Symbol | String, ?array: bool, ?default: untyped, ?required: bool) -> void
+      def all_attributes: () -> Hash[Symbol, Hash[Symbol, untyped]]
+      def remove_all_attributes!: () -> void
+    end
+
+    def initialize: (*untyped) -> void
+    def run!: () -> untyped
+  end
+end

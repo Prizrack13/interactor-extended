@@ -1,0 +1,7 @@
+module Interactor
+  module Duration
+    class JsonFormatter < BaseFormatter
+      def value: () -> Array[Hash[Symbol, untyped]]
+    end
+  end
+end

@@ -1,0 +1,6 @@
+module Interactor
+  module Extended
+    class Error < StandardError
+    end
+  end
+end

@@ -1,0 +1,13 @@
+module Interactor
+  module Loggable
+    class << self
+      def included: (untyped base) -> void
+    end
+
+    module ClassMethods
+      def logger: () -> untyped
+    end
+
+    def logger: () -> untyped
+  end
+end

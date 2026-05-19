@@ -1,0 +1,7 @@
+module Interactor
+  module Duration
+    class StringFormatter < JsonFormatter
+      def value: () -> String
+    end
+  end
+end

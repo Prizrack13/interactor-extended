@@ -1,0 +1,20 @@
+module Interactor
+  module Populate
+    class << self
+      def included: (untyped base) -> void
+    end
+
+    module ClassMethods
+      def call: (*untyped args) -> untyped
+      def call!: (*untyped args) -> untyped
+
+      private
+
+      def populate: (?Hash[untyped, untyped] context, ?untyped parent_context, *untyped keys) { (Hash[untyped, untyped]) -> untyped } -> untyped
+    end
+
+    protected
+
+    def context_assign: (?Hash[untyped, untyped] data) -> LightContext
+  end
+end

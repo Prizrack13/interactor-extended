@@ -1,24 +1,71 @@
 # Interactor::Extended
 
-TODO: Delete this and the text below, and describe your gem
+[![Quality Checks](https://github.com/Prizrack13/interactor-extended/actions/workflows/pull-requests.yml/badge.svg)](https://github.com/Prizrack13/interactor-extended/actions/workflows/pull-requests.yml)
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/interactor/extended`. To experiment with that code, run `bin/console` for an interactive prompt.
+A powerful extension for the `interactor` gem, providing a set of modules. Lightweight context, self-documented input/output attributes, logging, job integration, duration tracking debug, and more.
 
 ## Installation
 
-TODO: Replace `UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG` with your gem name right after releasing it to RubyGems.org. Please do not do it earlier due to security reasons. Alternatively, replace this section with instructions to install your gem from git if you don't plan to release to RubyGems.org.
+Add this line to your application's Gemfile:
 
-Install the gem and add to the application's Gemfile by executing:
+```ruby
+gem 'interactor-extended'
+```
 
-    $ bundle add UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+And then execute:
 
-If bundler is not being used to manage dependencies, install the gem by executing:
+```bash
+$ bundle install
+```
 
-    $ gem install UPDATE_WITH_YOUR_GEM_NAME_IMMEDIATELY_AFTER_RELEASE_TO_RUBYGEMS_ORG
+Or install it yourself as:
+
+```bash
+$ gem install interactor-extended
+```
 
 ## Usage
 
-TODO: Write usage instructions here
+```ruby
+class MyInteractor
+  include Interactor::Operation
+
+  input :id, Integer, require: true
+  output :user, User
+
+  def call
+    logger.info "Processing user: #{id}"
+    self.user = User.find(id)
+  rescue ActiveRecord::RecordNotFound
+    context.fail!(error: 'User not found')
+  end
+end
+
+result = MyInteractor.call(id: 1)
+result.success? # => true
+result.user     # => #<User ...>
+```
+
+## Documentation
+
+### Core Modules
+- [Operation](docs/operation.md)
+- [Flow](docs/flow.md)
+- [Organize](docs/organize.md)
+- [LightContext](docs/light_context.md)
+- [ContextDefinition & Contextable](docs/context_definition.md)
+
+### Extensions & Utilities
+- [Duration](docs/duration.md)
+- [Loggable](docs/loggable.md)
+- [Jobify](docs/jobify.md)
+- [Populate](docs/populate.md)
+- [Extended](docs/extended.md)
+- [Colorize](docs/colorize.md)
+
+### Additional Guides
+- [Configuration](docs/configuration.md)
+- [Best Practices](docs/best_practices.md)
 
 ## Development
 

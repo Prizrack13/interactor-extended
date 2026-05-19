@@ -1,0 +1,5 @@
+module Interactor
+  module Threadable
+    def thread: () { () -> untyped } -> Thread
+  end
+end

@@ -1,6 +1,12 @@
 module Interactor
   module Extended
-    VERSION: String
-    # See the writing guide of rbs: https://github.com/ruby/rbs#guides
+    class << self
+      def configuration: () -> Configuration
+      def configuration=: (Configuration config) -> Configuration
+      def configure: () { (Configuration) -> untyped } -> untyped
+      def modules: (Symbol kind, Symbol | Array[untyped] type) -> Array[untyped]
+      def build_module: (Symbol kind, Symbol | Array[untyped] type) -> Module
+      def thread: () { () -> untyped } -> Thread
+    end
   end
 end
