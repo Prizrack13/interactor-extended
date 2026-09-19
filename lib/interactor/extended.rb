@@ -73,9 +73,9 @@ module Interactor
       # @yield The block to execute in the new thread.
       # @return [Thread]
       def thread(&block)
-        current = Thread.current.thread_variable_get('interactor.duration')&.data
+        current = Thread.current[:'interactor.duration']&.data
         Thread.new do
-          Thread.current.thread_variable_set('interactor.duration_current', current)
+          Thread.current[:'interactor.duration_current'] = current
           block.call
         end
       end

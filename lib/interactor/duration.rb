@@ -20,19 +20,19 @@ module Interactor
           private
 
           def _duration
-            Thread.current.thread_variable_get('interactor.duration')
+            Thread.current[:'interactor.duration']
           end
 
           def _duration=(value)
-            Thread.current.thread_variable_set('interactor.duration', value)
+            Thread.current[:'interactor.duration'] = value
           end
 
           def _duration_current
-            Thread.current.thread_variable_get('interactor.duration_current')
+            Thread.current[:'interactor.duration_current']
           end
 
           def _duration_current=(value)
-            Thread.current.thread_variable_set('interactor.duration_current', value)
+            Thread.current[:'interactor.duration_current'] = value
           end
 
           def _duration_clock

@@ -4,14 +4,14 @@ RSpec.describe Interactor::Duration do
   let(:interactor) do
     build_interactor(Interactor::Operation[:all_debug]) do
       def call
-        sleep 0.1
+        sleep 0.005
       end
     end
   end
   let(:interactor2) do
     build_interactor(Interactor::Operation[:all_debug]) do
       def call
-        sleep 0.2
+        sleep 0.01
       end
     end
   end
@@ -20,11 +20,11 @@ RSpec.describe Interactor::Duration do
       duration(true)
       def call
         another
-        sleep 0.1
+        sleep 0.005
       end
 
       def another
-        sleep 0.1
+        sleep 0.005
       end
     end
   end
@@ -33,11 +33,11 @@ RSpec.describe Interactor::Duration do
       duration
       def call
         another
-        sleep 0.1
+        sleep 0.005
       end
 
       def another
-        sleep 0.1
+        sleep 0.005
       end
     end
   end
@@ -58,16 +58,16 @@ RSpec.describe Interactor::Duration do
     child_message = messages.first.dig(0, :children, 0)
     expect(message[:name]).to eq('Anonymous::Interactor::Flow')
     expect(message[:count]).to eq(1)
-    expect(message[:time] > 300).to eq(true)
-    expect(message[:own] < 100).to eq(true)
-    expect(message[:max] < 100).to eq(true)
+    expect(message[:time] > 13).to eq(true)
+    expect(message[:own] < 5).to eq(true)
+    expect(message[:max] < 5).to eq(true)
     expect(child_message[:name]).to eq('Anonymous::Interactor::Operation')
     expect(child_message[:count]).to eq(2)
-    expect(child_message[:time] > 150).to eq(true)
-    expect(child_message[:time] < 190).to eq(true)
-    expect(child_message[:own] > 150).to eq(true)
-    expect(child_message[:own] < 190).to eq(true)
-    expect(child_message[:max] > 200).to eq(true)
+    expect(child_message[:time] > 6).to eq(true)
+    expect(child_message[:time] < 14).to eq(true)
+    expect(child_message[:own] > 6).to eq(true)
+    expect(child_message[:own] < 14).to eq(true)
+    expect(child_message[:max] > 8).to eq(true)
   end
 
   it 'inherit' do
@@ -83,20 +83,20 @@ RSpec.describe Interactor::Duration do
     expect(messages.first.count).to eq(1)
     expect(message[:name]).to eq('Anonymous::Interactor::Operation')
     expect(message[:count]).to eq(1)
-    expect(message[:time] > 200).to eq(true)
-    expect(message[:own] < 10).to eq(true)
-    expect(message[:max] < 10).to eq(true)
+    expect(message[:time] > 8).to eq(true)
+    expect(message[:own] < 2).to eq(true)
+    expect(message[:max] < 2).to eq(true)
     expect(child_message[:name]).to eq('Anonymous::Interactor::Operation#call')
     expect(child_message[:count]).to eq(1)
-    expect(child_message[:time] > 200).to eq(true)
-    expect(child_message[:own] > 100).to eq(true)
-    expect(child_message[:own] < 200).to eq(true)
-    expect(child_message[:max] > 100).to eq(true)
+    expect(child_message[:time] > 8).to eq(true)
+    expect(child_message[:own] > 3).to eq(true)
+    expect(child_message[:own] < 9).to eq(true)
+    expect(child_message[:max] > 3).to eq(true)
     expect(child_message2[:name]).to eq('Anonymous::Interactor::Operation#another')
     expect(child_message2[:count]).to eq(1)
-    expect(child_message2[:time] < 200).to eq(true)
-    expect(child_message2[:own] < 200).to eq(true)
-    expect(child_message2[:max] < 200).to eq(true)
+    expect(child_message2[:time] < 9).to eq(true)
+    expect(child_message2[:own] < 9).to eq(true)
+    expect(child_message2[:max] < 9).to eq(true)
   end
 
   it 'duration(all)' do
@@ -106,14 +106,14 @@ RSpec.describe Interactor::Duration do
     expect(messages.first.count).to eq(1)
     expect(message[:name]).to eq('Anonymous::Interactor::Operation')
     expect(message[:count]).to eq(1)
-    expect(message[:time] > 200).to eq(true)
-    expect(message[:own] < 10).to eq(true)
-    expect(message[:max] < 10).to eq(true)
+    expect(message[:time] > 8).to eq(true)
+    expect(message[:own] < 2).to eq(true)
+    expect(message[:max] < 2).to eq(true)
     expect(child_message[:name]).to eq('Anonymous::Interactor::Operation#call')
     expect(child_message[:count]).to eq(1)
-    expect(child_message[:time] > 200).to eq(true)
-    expect(child_message[:own] > 200).to eq(true)
-    expect(child_message[:max] > 200).to eq(true)
+    expect(child_message[:time] > 8).to eq(true)
+    expect(child_message[:own] > 8).to eq(true)
+    expect(child_message[:max] > 8).to eq(true)
   end
 
   context 'string format' do
