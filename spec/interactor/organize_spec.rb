@@ -41,6 +41,20 @@ RSpec.describe Interactor::Organize do
     end
   end
 
+  describe 'inheritance' do
+    it 'uses parent organized when child has none' do
+      child = Class.new(organizer)
+      expect(child.organized).to eq(organizer.organized)
+    end
+
+    it 'uses own organized when child defines its own' do
+      child = Class.new(organizer)
+      child.organize([interactor])
+      expect(child.organized).to eq([interactor])
+      expect(organizer.organized).to eq([interactor, interactor2])
+    end
+  end
+
   describe 'nested organizer' do
     let(:inner_organizer) { build_organizer(organize: [interactor]) }
     let(:outer_organizer) { build_organizer(organize: [inner_organizer, interactor2]) }

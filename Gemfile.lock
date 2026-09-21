@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    interactor-extended (0.1.1)
+    interactor-extended (0.1.2)
       interactor (~> 3.2.0)
 
 GEM

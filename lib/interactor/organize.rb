@@ -17,6 +17,12 @@ module Interactor
     end
 
     module ClassMethods
+      def organized
+        return @organized if instance_variable_defined?(:@organized)
+
+        superclass.respond_to?(:organized) ? superclass.organized : []
+      end
+
       # Creates a ThreadRunner for the given class.
       # @param klass [Class] The class to run in a thread.
       # @return [ThreadRunner]
