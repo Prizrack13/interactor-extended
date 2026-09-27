@@ -1,16 +1,67 @@
 # frozen_string_literal: true
 
 module Interactor
-  # Provides orchestration functionality for interactors.
   module Organize
-    # A thread runner that executes a klass in a new thread.
-    class ThreadRunner < Proc
-      alias call! call
+    class Step
+      def initialize(hash)
+        @klass = hash[:class]
+        @if = hash[:if]
+        @unless = hash[:unless]
+        @thread = hash.fetch(:thread, false)
+      end
+
+      def call(interactor)
+        return if @if && !guard(@if, interactor)
+        return if @unless && guard(@unless, interactor)
+
+        @thread ? ::Interactor::Extended.thread { invoke(interactor) } : invoke(interactor)
+      end
+
+      private
+
+      def guard(cond, interactor)
+        cond.is_a?(Symbol) ? interactor.send(cond) : interactor.instance_exec(&cond)
+      end
+
+      def invoke(interactor)
+        return interactor.send(@klass) if @klass.is_a?(Symbol)
+
+        method = @klass.respond_to?(:call!) ? :call! : :call
+        @klass.public_send(method, interactor.context)
+      end
+
+      class << self
+        def compile(entries)
+          pair_merge(entries).map { compile_entry(_1) }
+        end
+
+        def compile_entry(entry)
+          hash = entry.is_a?(Hash) ? entry : { class: entry }
+          return new(hash) if hash[:if] || hash[:unless] || hash[:thread]
+
+          klass = hash[:class]
+          return ->(i) { i.send(klass) } if klass.is_a?(Symbol)
+
+          m = klass.respond_to?(:call!) ? :call! : :call
+          ->(i) { klass.public_send(m, i.context) }
+        end
+
+        private
+
+        def pair_merge(entries)
+          entries.each_with_object([]) do |entry, result|
+            result <<
+              if entry.is_a?(Hash) && !entry.key?(:class) && result.last && !result.last.is_a?(Hash)
+                { class: result.pop }.merge(entry)
+              else
+                entry
+              end
+          end
+        end
+      end
     end
 
     class << self
-      # Includes the organize functionality into a base class.
-      # @param base [Class] The class to include the module into.
       def included(base)
         base.extend(ClassMethods)
       end
@@ -23,33 +74,31 @@ module Interactor
         superclass.respond_to?(:organized) ? superclass.organized : []
       end
 
-      # Creates a ThreadRunner for the given class.
-      # @param klass [Class] The class to run in a thread.
-      # @return [ThreadRunner]
-      def thread(klass)
-        ThreadRunner.new { |context| ::Interactor::Extended.thread { klass.call!(context) } }
+      def organize(*args)
+        @organized = Step.compile(args.flatten)
+      end
+
+      def step(klass, **options)
+        { class: klass }.merge(options)
+      end
+
+      def thread(klass, **)
+        step(klass, thread: true, **)
       end
     end
 
-    # Executes the organized interactors.
-    # @return [untyped]
     def call
-      organize(organized) if self.class.respond_to?(:organized)
+      organize(organized)
     end
 
     protected
 
-    # Organizes the execution of interactors.
-    # @param organized [untyped] The interactors to organize.
-    # @return [untyped]
     def organize(*organized)
-      organized.flatten.map { _1.call!(context) }.map { _1.join if _1.is_a?(Thread) }
+      organized.flatten.filter_map { _1.call(self) }.each { _1.join if _1.is_a?(Thread) }
     end
 
-    # Returns the organized interactors.
-    # @return [untyped]
     def organized
-      context[:organized] || self.class.organized
+      context[:organized] ? Step.compile(context[:organized]) : self.class.organized
     end
   end
 end

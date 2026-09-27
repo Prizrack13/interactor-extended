@@ -1,0 +1,74 @@
+name: Publish Wiki
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'docs/**'
+      - 'CHANGELOG.md'
+  workflow_dispatch:
+    inputs:
+      page:
+        description: >
+          Doc page to publish (filename without .md, e.g. context_definition).
+          Leave empty to publish all docs and the changelog.
+        required: false
+        default: ''
+      title:
+        description: >
+          Wiki page title for a custom ad-hoc page.
+          Leave empty when publishing from docs/.
+        required: false
+        default: ''
+      content:
+        description: >
+          Markdown content for a new ad-hoc wiki page. Requires title to be set.
+          Leave empty when publishing from docs/.
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  wiki:
+    name: Publish to Wiki
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Prepare wiki content
+        run: |
+          mkdir -p wiki-content
+          page="${{ github.event.inputs.page }}"
+          title="${{ github.event.inputs.title }}"
+          content="${{ github.event.inputs.content }}"
+
+          wiki_name() {
+            ruby -e "puts ARGV[0].split('_').map(&:capitalize).join('-')" "$1"
+          }
+
+          if [ -n "$content" ] && [ -n "$title" ]; then
+            echo "$content" > "wiki-content/${title}.md"
+
+          elif [ -n "$page" ]; then
+            base=$(basename "docs/${page}.md" .md)
+            cp "docs/${page}.md" "wiki-content/$(wiki_name "$base").md"
+
+          else
+            for f in docs/*.md; do
+              base=$(basename "$f" .md)
+              cp "$f" "wiki-content/$(wiki_name "$base").md"
+            done
+            cp CHANGELOG.md wiki-content/Changelog.md
+          fi
+
+      - name: Publish to wiki
+        uses: Andrew-Chen-Wang/github-wiki-action@v4
+        with:
+          path: wiki-content/
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -24,7 +24,7 @@ module Interactor
           when :json, :flat_json then JsonFormatter
           when :string, :flat_string then StringFormatter
           else ColorStringFormatter
-          end.new(data, flat: format.to_s.match(/^flat_/)).value
+          end.new(data, flat: format.to_s.start_with?('flat_')).value
         end
       end
     end

@@ -1,20 +1,32 @@
 module Interactor
   module ContextDefinition
+    NON_VALIDATOR_OPTIONS: ::Array[::Symbol]
+
     class << self
       def included: (untyped base) -> void
+      def extract_options: (Array[untyped] args) -> [Array[Symbol], Hash[Symbol, untyped]]
     end
 
     module ClassMethods
       attr_accessor attributes: Hash[Symbol, Hash[Symbol, untyped]] | nil
 
-      def attribute: (*Symbol | String, ?array: bool, ?default: untyped, ?required: bool, ?direction: Symbol) -> void
-      def input: (*Symbol | String, ?array: bool, ?default: untyped, ?required: bool, ?writer: bool) -> void
-      def output: (*Symbol | String, ?array: bool, ?default: untyped, ?required: bool) -> void
+      def attribute: (*untyped args) -> void
+      def input: (*untyped args) -> void
+      def output: (*untyped args) -> void
       def all_attributes: () -> Hash[Symbol, Hash[Symbol, untyped]]
       def remove_all_attributes!: () -> void
     end
 
     def initialize: (*untyped) -> void
     def run!: () -> untyped
+
+    private
+
+    def initialize_default_values: () -> void
+    def initialize_coerce_values: () -> void
+    def set_attribute: (Symbol key, untyped value) -> void
+    def apply_coerce: (Symbol | Proc | Class | nil coerce, untyped value) -> untyped
+    def check_attributes: () -> Hash[Symbol, Array[String]]
+    def check_attribute: (Symbol key, ?untyped value) -> Array[String]
   end
 end

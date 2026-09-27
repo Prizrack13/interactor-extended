@@ -1,6 +1,13 @@
 # frozen_string_literal: true
 
 module InteractorHelpers
+  def interactor_with(&block)
+    build_interactor do
+      class_eval(&block)
+      define_method(:call) {} # rubocop:disable Lint/EmptyBlock
+    end
+  end
+
   def build_interactor(klass = Interactor::Operation, &block)
     Class.new.send(:include, klass).tap do |klass_instance|
       klass_instance.class_eval do

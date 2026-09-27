@@ -1,0 +1,30 @@
+module Interactor
+  module Validations
+    @registry: Hash[Symbol, singleton(Base)]
+
+    def self.register: (Symbol key, singleton(Base) klass) -> void
+    def self.unregister: (singleton(Base) klass) -> void
+    def self.registry: () -> Hash[Symbol, singleton(Base)]
+    def self.compile: (Hash[Symbol, untyped] opts) -> Array[Base]
+
+    class Base
+      include Interactor::Extended::Helpers
+
+      @key: Symbol | nil
+      @direction: Symbol
+      @message: String | Proc | nil
+
+      def self.inherited: (singleton(Base) subclass) -> void
+      def self.register_as: (Symbol key) -> void
+
+      def initialize: (untyped value, Hash[Symbol, untyped] options) -> void
+      def validate: (untyped value, untyped interactor) -> (nil | false | String)
+      def message: (untyped interactor) -> String
+
+      protected
+
+      def param_label: () -> String
+      def default_message: () -> String
+    end
+  end
+end

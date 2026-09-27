@@ -1,0 +1,14 @@
+module Interactor
+  module Validations
+    class Validate < Base
+      @validator: Symbol | Proc
+
+      def initialize: (Symbol | Proc | Hash[Symbol, untyped] value, Hash[Symbol, untyped] options) -> void
+
+      private
+
+      def coerce_symbol_result: (untyped result) -> (nil | false | String)
+      def coerce_proc_result: (untyped result) -> (nil | false | String)
+    end
+  end
+end

@@ -1,0 +1,11 @@
+module Interactor
+  module Validations
+    class Length < Base
+      @is: Integer | nil
+      @minimum: Integer | nil
+      @maximum: Integer | nil
+
+      def initialize: (Integer | Hash[Symbol, untyped] value, Hash[Symbol, untyped] options) -> void
+    end
+  end
+end

@@ -1,0 +1,10 @@
+module Interactor
+  module Validations
+    class Type < Base
+      @array: bool
+      @types: Array[String]
+
+      def initialize: (untyped value, Hash[Symbol, untyped] options) -> void
+    end
+  end
+end

@@ -7,11 +7,13 @@ It similar to Interactor::ContextDefinition but it basically creates only read/w
 class TypedInteractor
   include Interactor::Operation
 
-  input :a, Integer
-  input :b, String, require: true
-  output :c, [Integer, String], array: true
+  input  :id,     Integer, required: true
+  input  :tags,   String,  array: true, default: []
+  input  :active, :boolean
+  output :result, Hash
+
   def call
-    self.c = [a, b]
+    self.result = { id:, tags:, active: }
   end
 end
 ```

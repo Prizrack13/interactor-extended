@@ -1,6 +1,27 @@
 module Interactor
   module Organize
-    class ThreadRunner < Proc
+    class Step
+      @klass: untyped
+      @if: Symbol | Proc | nil
+      @unless: Symbol | Proc | nil
+      @thread: bool
+
+      def initialize: (Hash[Symbol, untyped] hash) -> void
+      def call: (untyped interactor) -> untyped
+
+      class << self
+        def compile: (Array[untyped] entries) -> Array[Step | Proc]
+        def compile_entry: (untyped entry) -> (Step | Proc)
+
+        private
+
+        def pair_merge: (Array[untyped] entries) -> Array[untyped]
+      end
+
+      private
+
+      def guard: (Symbol | Proc cond, untyped interactor) -> boolish
+      def invoke: (untyped interactor) -> untyped
     end
 
     class << self
@@ -8,14 +29,17 @@ module Interactor
     end
 
     module ClassMethods
-      def thread: (untyped klass) -> ThreadRunner
+      def organized: () -> Array[Step | Proc]
+      def organize: (*untyped args) -> Array[Step | Proc]
+      def step: (untyped klass, **untyped options) -> Hash[Symbol, untyped]
+      def thread: (untyped klass, **untyped options) -> Hash[Symbol, untyped]
     end
 
-    def call: () -> untyped
+    def call: () -> void
 
     protected
 
     def organize: (*untyped organized) -> Array[untyped]
-    def organized: () -> untyped
+    def organized: () -> Array[Step | Proc]
   end
 end

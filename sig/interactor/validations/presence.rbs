@@ -1,0 +1,9 @@
+module Interactor
+  module Validations
+    class Presence < Base
+      private
+
+      def blank?: (untyped value) -> bool
+    end
+  end
+end

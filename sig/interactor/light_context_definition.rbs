@@ -5,9 +5,9 @@ module Interactor
     end
 
     module ClassMethods
-      def attribute: (*Symbol | String, ?array: bool, ?default: untyped, ?required: bool, ?direction: Symbol) -> void
-      def input: (*Symbol | String, ?array: bool, ?default: untyped, ?required: bool, ?writer: bool) -> void
-      def output: (*Symbol | String, ?array: bool, ?default: untyped, ?required: bool) -> void
+      def attribute: (*untyped args) -> void
+      def input: (*untyped args) -> void
+      def output: (*untyped args) -> void
     end
   end
 end

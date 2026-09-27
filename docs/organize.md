@@ -1,20 +1,69 @@
 # Interactor::Organize
 
-It adds useful methods.
-With organize key you can run only specific interactors.
-Also, you can run interactos in parallel way using thread method.
+Runs a list of interactors in sequence, sharing a single context.
 
-**Example:**
+## Entry forms
+
 ```ruby
-class ParallelFlow
+class MyFlow
   include Interactor::Flow
 
-  organize(
-    thread(SimpleInteractor),
-    thread(SimpleSecondInteractor)
-  )
+  organize StepOne,                            # class
+           { class: StepTwo, if: :enabled? },  # hash with condition
+           :inline_step,                        # symbol — calls method on organizer
+           step(StepThree, unless: :skip?),     # step helper
+           thread(StepFour)                     # threaded
+
+  def inline_step = StepOne.call!(context)
+  def enabled?    = context[:enabled]
+  def skip?       = context[:skip]
 end
-ParallelFlow.call!(organize: [SimpleInteractor])
 ```
+
+## Conditions
+
+`:if` and `:unless` accept a Symbol (`send` on organizer) or a Proc (`instance_exec`):
+
+```ruby
+organize step(StepOne, if: :ready?),
+         step(StepTwo, if: -> { context[:value].present? })
+```
+
+## Pair shorthand
+
+A trailing hash without `:class` applies to the preceding entry:
+
+```ruby
+organize StepOne, { if: :ready? },
+         StepTwo, { unless: :skip? }
+```
+
+## Threads
+
+All threads are joined before `call` returns:
+
+```ruby
+organize thread(StepOne), thread(StepTwo), StepThree
+```
+
+## Symbol entries
+
+A Symbol calls the named method on the organizer. Useful for inline logic or dynamic dispatch:
+
+```ruby
+organize :my_step, { if: :enabled? }
+
+def my_step = StepOne.call!(context)
+```
+
+## Runtime override
+
+```ruby
+MyFlow.call!(organized: [StepOne])
+```
+
+## Inheritance
+
+Subclasses inherit the parent's list unless they define their own.
 
 [Back to README](../README.md)

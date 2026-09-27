@@ -1,0 +1,18 @@
+module Interactor
+  module Validations
+    class Numericality < Base
+      COMPARISONS: Hash[Symbol, [Symbol, String]]
+
+      @only_integer: bool
+      @odd: bool
+      @even: bool
+      @checks: Array[[Symbol, Numeric, String]]
+
+      def initialize: (true | Hash[Symbol, untyped] value, Hash[Symbol, untyped] options) -> void
+
+      private
+
+      def parse: (untyped value) -> Numeric?
+    end
+  end
+end

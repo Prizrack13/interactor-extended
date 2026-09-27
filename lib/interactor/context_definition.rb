@@ -5,65 +5,69 @@ module Interactor
   module ContextDefinition
     include Interactor::Extended::Helpers
 
+    # Non-validator options accepted by attribute/input/output.
+    # Validator option keys are registered dynamically via Interactor::Validations.registry.
+    NON_VALIDATOR_OPTIONS = %i[array coerce default direction writer validations].freeze
+
     class << self
       def included(base)
         base.extend(ClassMethods)
         base.remove_all_attributes!
+      end
+
+      def extract_options(args)
+        options = args.last.is_a?(Hash) ? args.pop : {}
+        validate_options!(options)
+        options[:type] ||= args.pop if positional_type?(args.last)
+        options[:direction] ||= :output
+        [args, options]
+      end
+
+      private
+
+      def validate_options!(options)
+        known = NON_VALIDATOR_OPTIONS | Interactor::Validations.registry.keys
+        unknown = options.keys - known
+        raise ArgumentError, "Unknown option(s): #{unknown.map(&:inspect).join(', ')}" if unknown.any?
+      end
+
+      def positional_type?(arg)
+        return false unless arg
+        return true if arg == :boolean
+
+        !arg.is_a?(Symbol) && !arg.is_a?(String)
       end
     end
 
     module ClassMethods
       attr_accessor :attributes
 
-      # Defines an attribute for the context.
-      # @param methods [Symbol, String] The attribute names.
-      # @param array [bool] Whether the attribute is an array.
-      # @param default [untyped, nil] Default value for the attribute.
-      # @param required [bool] Whether the attribute is required.
-      # @param direction [Symbol] The direction of the attribute (:input or :output).
-      def attribute(*methods, array: false, default: nil, required: false, direction: :output) # rubocop:disable Metrics
+      def attribute(*args)
+        methods, options = ContextDefinition.extract_options(args)
         self.attributes ||= {}
-        if !(methods.last.is_a?(String) || methods.last.is_a?(Symbol)) || methods.last == :boolean
-          type = methods.pop
-          type = [TrueClass, FalseClass] if type == :boolean
-          type = type.is_a?(Array) ? type.map(&:name) : type.name
-          methods.each do |method|
-            attributes[method] = {
-              type:,
-              direction:,
-              array:,
-              default:,
-              required:
-            }
+        methods.each do |method|
+          validations = Interactor::Validations.compile(options.merge(key: method))
+          if validations.any? || !options[:default].nil? || options[:coerce]
+            attributes[method] = options.slice(*%i[direction default coerce]).merge(validations:)
           end
-        end
-        methods.each do |method|
           define_method(method) { context[method] }
-        end
-        return if direction != :output
+          next if options[:direction] != :output
 
-        methods.each do |method|
           define_method(:"#{method}=") { |value| set_attribute(method, value) }
         end
       end
 
-      # Defines an input attribute.
-      # @param methods [Symbol, String] The input names.
-      # @param array [bool] Whether the input is an array.
-      # @param default [untyped, nil] Default value.
-      # @param required [bool] Whether the input is required.
-      # @param writer [bool] Whether to define a writer method.
-      def input(*methods, array: false, default: nil, required: false, writer: false)
-        attribute(*methods, array:, default:, required:, direction: writer ? :output : :input)
+      def input(*args)
+        methods, options = ContextDefinition.extract_options(args)
+        writer = options.delete(:writer)
+        options[:direction] = writer ? :output : :input
+        attribute(*methods, options)
       end
 
-      # Defines an output attribute.
-      # @param methods [Symbol, String] The output names.
-      # @param array [bool] Whether the output is an array.
-      # @param default [untyped, nil] Default value.
-      # @param required [bool] Whether the output is required.
-      def output(*methods, array: false, default: nil, required: false)
-        attribute(*methods, array:, default:, required:)
+      def output(*args)
+        methods, options = ContextDefinition.extract_options(args)
+        options[:direction] = :output
+        attribute(*methods, options)
       end
 
       # Returns all attributes defined in the class hierarchy.
@@ -78,7 +82,9 @@ module Interactor
           klass = klass.superclass
           break if klass == Object
         end
-        @all_attributes ||= attributes_arr.reverse.compact.each_with_object({}) { |attrs, result| result.merge!(attrs) }
+        @all_attributes ||= attributes_arr.reverse.compact.each_with_object({}) do |attribute_set, merged|
+          merged.merge!(attribute_set)
+        end
       end
 
       # Removes all cached attributes.
@@ -91,6 +97,7 @@ module Interactor
     def initialize(*)
       super
       initialize_default_values
+      initialize_coerce_values
       errors = check_attributes
       context.fail!(errors:, interactor: self.class.name) unless errors.empty?
     rescue Failure # rubocop:disable Lint/SuppressedException
@@ -107,50 +114,61 @@ module Interactor
     private
 
     def initialize_default_values
-      self.class.all_attributes
-          .select { |key, options| !options[:default].nil? && !context.respond_to?(key) }
-          .each do |key, options|
+      self.class.all_attributes.each do |key, attribute_options|
+        next if attribute_options[:default].nil? || context.respond_to?(key)
+
         value =
-          if options[:default].is_a?(Proc)
-            instance_exec(*[self, context][0, options[:default].arity], &options[:default])
+          if attribute_options[:default].is_a?(Proc)
+            instance_exec(*[self, context].first(attribute_options[:default].arity), &attribute_options[:default])
           else
-            deep_dup(options[:default])
+            deep_dup(attribute_options[:default])
           end
         set_attribute(key, value)
       end
     end
 
     def set_attribute(key, value)
-      error = check_attribute(key, value)
-      context.fail!(errors: { key => [error] }) if error
+      value = apply_coerce(self.class.all_attributes[key]&.[](:coerce), value) unless value.nil?
+      errors = check_attribute(key, value)
+      context.fail!(errors: { key => errors }) if errors.any?
       context[key] = value
     end
 
+    def initialize_coerce_values
+      self.class.all_attributes.each do |key, opts|
+        next unless opts[:coerce] && !context[key].nil?
+
+        context[key] = apply_coerce(opts[:coerce], context[key])
+      end
+    end
+
+    def apply_coerce(coerce, value)
+      case coerce
+      when Symbol then value.public_send(coerce)
+      when Proc then coerce.call(value)
+      when Class then coerce.parse(value)
+      else value
+      end
+    end
+
     def check_attributes
-      self.class.all_attributes.filter_map do |key, _options|
-        error = check_attribute(key)
-        [key, [error]] if error
+      self.class.all_attributes.filter_map do |key, _attribute_options|
+        errors = check_attribute(key)
+        [key, errors] if errors.any?
       end.to_h
     end
 
-    def check_attribute(key, value = nil) # rubocop:disable Metrics
-      options = self.class.all_attributes[key]
-      return unless options
+    def check_attribute(key, value = nil)
+      attribute_options = self.class.all_attributes[key]
+      return [] unless attribute_options
 
       value ||= context[key]
-      types = [options[:type]].flatten.map { safe_constantize(_1) }
-      if value.nil?
-        return options[:required] ? "#{options[:direction].capitalize} param \"#{key}\" is required" : nil
+      attribute_options[:validations].filter_map do |validator|
+        result = validator.validate(value, self)
+        next nil if result.nil?
+
+        result.is_a?(String) ? result : validator.message(self)
       end
-
-      if options[:array]
-        return if value.is_a?(Array) && value.all? { |item| types.any? { |type| item.is_a?(type) } }
-
-        return "#{options[:direction].capitalize} param \"#{key}\" is not kind of Array of #{types.join(', ')}"
-      end
-      return if types.any? { |type| value.is_a?(type) }
-
-      "#{options[:direction].capitalize} param \"#{key}\" is not kind of #{types.join(', ')}"
     end
   end
 end

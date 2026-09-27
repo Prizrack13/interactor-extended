@@ -105,7 +105,7 @@ module Interactor
     # Checks if jos class is Sidekiq.
     # @return [bool]
     def sidekiq?
-      SidekiqJob.included_modules.include?(Sidekiq::Job)
+      job_class.included_modules.include?(Sidekiq::Job)
     rescue StandardError
       false
     end
@@ -113,7 +113,7 @@ module Interactor
     # Checks if job class is ApplicationJob.
     # @return [bool]
     def application_job?
-      ApplicationJob.superclass == ActiveJob::Base
+      job_class < ActiveJob::Base
     rescue StandardError
       false
     end

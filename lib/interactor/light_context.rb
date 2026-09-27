@@ -77,7 +77,7 @@ module Interactor
     # Converts the context to a hash.
     # @return [Hash]
     def to_h
-      data.to_h.clone
+      @data.dup
     end
 
     # Returns a string representation of the context.
@@ -130,7 +130,7 @@ module Interactor
     # @param keys [Array<Symbol>, nil] The keys to include.
     # @return [Hash[Symbol, untyped]]
     def deconstruct_keys(keys = nil)
-      deconstructed_keys = to_h.merge(success: success?, failure: failure?)
+      deconstructed_keys = to_h.merge!(success: success?, failure: failure?)
       keys ? deconstructed_keys.slice(*keys) : deconstructed_keys
     end
 

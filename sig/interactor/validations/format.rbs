@@ -1,0 +1,10 @@
+module Interactor
+  module Validations
+    class Format < Base
+      @with: Regexp | nil
+      @without: Regexp | nil
+
+      def initialize: (Regexp | Hash[Symbol, untyped] value, Hash[Symbol, untyped] options) -> void
+    end
+  end
+end
